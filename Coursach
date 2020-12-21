@@ -1,0 +1,918 @@
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <cstdio> 
+#include <conio.h>
+#include <stdio.h>
+#include <cstdlib> 
+#include <chrono>
+#include <iomanip>
+#include <fstream>
+#include <algorithm>
+#include <Windows.h>
+using namespace std;
+using namespace chrono;
+
+// это для четвертой
+void clean(string str)
+{
+	setlocale(LC_ALL, "Russian");
+
+	char znak[9] = { ',' , ':' , ';' , '!' , '?' , '-' , '"' };
+
+	for (int j = 0; j < str.length(); j++)
+	{
+		if (str[j] == ' ')
+		{
+			while (str[j + 1] == ' ')
+				str.erase(j + 1, 1);
+		}
+	}
+	if (str[0] == ' ')
+		str.erase(0, 1);
+
+	if (str[str.length() - 1] == ' ')
+		str.erase(str.length() - 2, 1);
+
+	for (int i = 0; i < str.length(); i++)
+	{
+		for (int j = 0; j < 9; j++)
+		{
+			if (str[i] == znak[j])
+			{
+				while (str[i + 1] == znak[j])
+					str.erase(i + 1, 1);
+			}
+		}
+
+	}
+
+	for (int j = 0; j < str.length(); j++)
+	{
+		if (str[j] == '.' && str[j + 1] == '.' && str[j + 2] == '.')
+		{
+			j += 2;
+		}
+		else
+			if (str[j] == '.')
+			{
+				while (str[j + 1] == '.')
+					str.erase(j + 1, 1);
+			}
+	}
+
+	for (int i = 1; i < str.length(); i++)
+	{
+		str[i] = tolower(str[i]);
+	}
+
+	cout << "Отредактированная строка:" << str << "\n\n";
+}
+bool IsStrContainsNumb(const string str)
+{
+	return str.find_first_not_of(",.:;?!-()'0123456789") == string::npos;
+}
+bool IsStrContainsLetters(const string str)
+{
+	return str.find_first_not_of(",.:;?!-()'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ") == string::npos;
+}
+void linear(string line, string substring)
+{
+	int leng2 = substring.length();
+	int leng1 = line.length();
+	cout << "Индексы: ";
+	for (int i = 0; i <= leng1 - leng2; i++)
+	{
+		int j;
+		for (j = 0; j < leng2; j++)
+			if (line[i + j] != substring[j])
+				break;
+		if (j == leng2)
+			cout << i << " ";
+
+	}
+	cout << endl;
+}
+int chetire()
+{
+	setlocale(LC_ALL, "Russian");
+
+	string a;
+	cout << "Введите строку: ";
+	cin.ignore();
+	getline(cin, a);
+
+	bool filter = a.find_first_not_of(",.:;?!-()'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ") != string::npos;
+
+	bool quan = 0;
+	stringstream buf(a);
+	string Lett;
+	int words = 0;
+	while (buf >> Lett) {
+		words++;
+		if ((Lett.size() >= 10) || (Lett.size() < 1)) {
+			quan = 1;
+		}
+	}
+	int pass = 1;
+
+	if ((quan == 1) || (words < 1) || (words >= 50) || (filter == 1)) {
+		cout << "Введённая строка не соответствует условиям.\n 1)От 1 до 50 слов\n2)В каждом слове от 1 до 10 букв и цифр\n3)Только латинские буквы\n\n";
+		pass = 0;
+	}
+
+	while (pass == 1)
+	{
+		int number;
+		cout << "Выберите номер задания:\n2)Необходимо отредактировать входной текст: удалить лишние пробелы, удалить лишние знаки препинания, исправить регистр букв\n3)Вариант 6: После окончания ввода последовательности вывести на экран сначала все слова, содержащие только буквы, затем слова, содержащие только цифры, а потом слова, содержащие и буквы, и цифры.\n4) Вариант 5: Вывести на экран ту же последовательность, переместив все цифры, содержащиеся в словах, в конец соответствующих слов.\n5)Необходимо найти все подстроки, которую введёт пользователь в имеющейся строке.\n6)Выход\n\n";
+		cin >> number;
+
+		switch (number) {
+		case 2: {
+			clean(a);
+			break;
+		}
+		case 3: {
+			clean(a);
+			string let;
+			string num;
+			string letAndnum;
+			istringstream a2(a);
+
+			while (a2 >> a) {
+
+				if (IsStrContainsNumb(a) == 1) {
+					num += a;
+					num += " ";
+				}
+				if (IsStrContainsLetters(a) == 1) {
+					let += a;
+					let += " ";
+				}
+				if ((IsStrContainsLetters(a) == 0) && (IsStrContainsNumb(a) == 0)) {
+					letAndnum += a;
+					letAndnum += " ";
+				}
+			}
+
+			cout << "Слова, содержащие только буквы: " << let << endl;
+			cout << "Слова, содержащие только цифры: " << num << endl;
+			cout << "Слова, содержащие буквы и цифры: " << letAndnum << endl;
+			cout << endl;
+			break;
+
+		}
+		case 4:
+		{
+			auto start = a.begin();
+			auto space = a.begin();
+			while (true) {
+				space = find(start, a.end(), ' ');
+				stable_partition(start, space, [](char a) {return !isdigit(a); });
+				if (space == a.end())
+					break;
+				start = space + 1;
+			}
+			cout << a << endl;
+			break;
+		}
+		case 5:
+		{
+			string a2;
+			cout << "\nВведите подстроку: ";
+			cin >> a2;
+			linear(a, a2);
+
+			break;
+		}
+		case 6:
+			return 0;
+			break;
+		}
+	}
+}
+
+
+//это для второй
+
+int arr[100];
+void mass() // вывод массива
+{
+	for (int i = 0; i < 100; i++) {
+		cout << '[' << i << ']' << arr[i] << " ";
+	}
+	cout << endl;
+}
+void number_one() // Задание 1. Заполнение массива случайными числами от -99 до 99
+{
+	for (int i = 0; i < 100; i++) {
+		arr[i] = rand() % 199 - 99;
+	}
+}
+void number_two() // Задание 2. Сортировка массива пузырьком
+{
+	for (int i = 0; i < 100; i++)
+	{
+		for (int j = 0; j < 99; j++)
+		{
+			if (arr[j] > arr[j + 1])
+				swap(arr[j], arr[j + 1]);
+		}
+	}
+}
+void time() // Задание 2. Время сортировки массива пузырьком
+{
+	system_clock::time_point start = system_clock::now();
+	for (int i = 0; i < 100; i++)
+	{
+		for (int j = 0; j < 99; j++)
+		{
+			if (arr[j] > arr[j + 1])
+				swap(arr[j], arr[j + 1]);
+		}
+	}
+	system_clock::time_point end = system_clock::now();
+	duration<double> sort = end - start;
+
+	cout << "Время сортировки: " << std::fixed << sort.count() << "сек" << endl;
+}
+void number_three_unsort() // Задание 3. Максимальный и минимальный элементы неотсортированного массива. Время работы
+{
+	auto startMaxMinUnsort = system_clock::now();
+
+	number_one();
+	mass();
+	int min = 100, max = -100;
+	for (int i = 0; i < 100; i++)
+	{
+		if (arr[i] < min) min = arr[i];
+		if (arr[i] > max) max = arr[i];
+	}
+	auto endMaxMinUnsort = system_clock::now();
+	duration<double> sortMaxMinUnsort = endMaxMinUnsort - startMaxMinUnsort;
+
+	cout << std::fixed << "Время поиска максимального и минимального элементов в неотсортированном массиве: " << sortMaxMinUnsort.count() << "сек" << endl;
+	cout << "Максимальный элемент: " << max << endl;
+	cout << "Минимальный элемент" << min << "\n\n";
+}
+void number_three_sort() // Задание 3. Максимальный и минимальный элементы в отсортированном массиве
+{
+	auto startMaxMinSort = system_clock::now();
+
+	number_one();
+	mass();
+	number_two();
+
+
+	int min = 100, max = -100;
+	for (int i = 0; i < 100; i++)
+	{
+		if (arr[i] < min) min = arr[i];
+		if (arr[i] > max) max = arr[i];
+	}
+	system_clock::time_point endMaxMinSort = system_clock::now();
+	duration<double> sortMaxMin = endMaxMinSort - startMaxMinSort;
+
+	cout << "Время поиска максимального и минимального элементов в отсортированном массиве: " << std::fixed << sortMaxMin.count() << "сек" << endl;
+	cout << "Максимальный элемент: " << max << endl;
+	cout << "Минимальный элемент" << min << endl;
+}
+void number_four() // Задание 4. Среднее значение минимального и максимального элементов. Кол-во элементов массива, равных среднему значению и их индекс
+{
+	number_one();
+
+	int min = 100, max = -100, average;
+	for (int i = 0; i < 100; i++) // поиск минимального и максимального значений
+	{
+		if (arr[i] < min) min = arr[i];
+		if (arr[i] > max) max = arr[i];
+	}
+	average = (min + max) / 2; // поиск среднего значения
+
+	cout << "Максимальный элемент: " << max << endl;
+	cout << "Минимальный элемент" << min << endl;
+	cout << "Среднее значение максимального и минимального элементов массива = " << average << endl;
+
+	int count = 0;
+
+	for (int i = 0; i < 100; i++) // индекс среднего значения
+	{
+		if (arr[i] == average)
+		{
+			cout << "[" << i << "]" << arr[i] << endl;
+			count += 1;
+		}
+	}
+	if (count == 0)
+		cout << "В массиве нет элементов, равных среднему значению" << endl;
+
+	else if (count == 1)
+		cout << "Найден один элемент, равный среднему значению" << endl;
+	else if (count == 2 || count == 3 || count == 4) cout << "Найдено " << count << " элемента, равных среднему значению" << endl;
+	else cout << "Найдено" << count << "элементов, равных среднему значению" << endl;
+}
+void number_five() // Задание 5. Количество элементов массива, меньше введенного числа
+{
+	number_one();
+	number_two();
+	mass();
+
+	int a, z = 0;
+	cout << "Введите число a: ";
+	cin >> a;
+	for (int i = 0; i < 100; i++)
+	{
+		if (arr[i] < a) z++;
+	}
+	cout << "Количество элементов массива, меньше введенного числа: " << z << endl;
+}
+void number_six() // Задание 6. Количество элементов массива, больше введенного числа
+{
+	number_one();
+	number_two();
+	mass();
+
+	int b, x = 0;
+	cout << "Введите число b: ";
+	cin >> b;
+	for (int i = 0; i < 100; i++)
+	{
+		if (arr[i] > b) x++;
+	}
+	cout << "Количество элементов массива, больше введенного числа: " << x << endl;
+}
+void number_seven() // Задание 7. Бинарный поиск
+{
+	number_one();
+	number_two();
+	mass();
+	int bin, min = 0, max = 100, mid;
+	bool key = false;
+	cout << "Введите искомое число: ";
+	cin >> bin;
+
+	system_clock::time_point start1 = system_clock::now();
+
+	while (min <= max) // бинарный поиск
+	{
+		mid = (min + max) / 2;
+		if (arr[mid] == bin) break;
+		if (arr[mid] < bin) min = mid + 1;
+		if (arr[mid] > bin) max = mid - 1;
+	}
+	if (arr[mid] == bin) {
+		cout << "Введенный элемент есть в массиве, индекс: " << mid << endl;
+	}
+	else {
+		cout << "Введенного элемента в массиве нет" << endl;
+	}
+	system_clock::time_point end1 = system_clock::now();
+	duration<double> sort1 = end1 - start1;
+
+	system_clock::time_point start2 = system_clock::now();
+	for (int i = 0; i < 100; i++) { // поиск перебором
+		if (arr[i] == bin) {
+			key = true;
+		}
+	}
+	system_clock::time_point end2 = system_clock::now();
+	duration<double> sort2 = end2 - start2;
+
+	cout << fixed << "Разница между Бинарным поиском и перебором " << sort1.count() - sort2.count() << " секунд" << "\n";
+	cout << "\n";
+}
+void number_eight() // Задание 8. Меняет местами элементы массива, индексы которых вводит пользователь
+{
+	int one, two;
+	cout << "Введите индексы элементов массива, которые вы хотите поменять местами: ";
+	cin >> one >> two;
+
+	number_one();
+	mass();
+
+	system_clock::time_point start = system_clock::now();
+
+	swap(arr[one], arr[two]);
+
+	system_clock::time_point end = system_clock::now();
+	duration<double> sort = end - start;
+
+	cout << "Скорость обмена = " << std::fixed << sort.count() << " сек" << endl;
+
+	mass();
+}
+void dop() // Дополнительное задание №9. 
+{
+	cout << "Уменьшите каждый нечетный элемент на значение, введенное пользователем\n\n";
+	int red;
+	cout << "Введите число, на которое хотите уменьшить все нечетные элементы массива: ";
+	cin >> red;
+
+	number_one();
+	mass();
+	cout << endl;
+
+	for (int i = 0; i < 100; i++)
+	{
+		if (arr[i] % 2 != 0)
+			arr[i] = arr[i] - red;
+	}
+
+	mass();
+
+	cout << endl << " Каждый нечетный элемент умножьте на случайную величину в диапазоне от 1 до 9\n\n";
+
+	number_one();
+	mass();
+	cout << endl;
+
+	int inc = 1 + (rand() % 9);
+	cout << "Случайное число от 1 до 9 = " << inc << "\n\n";
+	for (int i = 0; i < 100; i++)
+	{
+		if (arr[i] % 2 != 0)
+			arr[i] = arr[i] * inc;
+	}
+
+	mass();
+
+	cout << "\nВыведите количество элементов, которые нацело делятся на 1,2,3,4,5,6,7,8,9\n\n";
+	int summ1(0), summ2(0), summ3(0), summ4(0), summ5(0), summ6(0), summ7(0), summ8(0), summ9(0);
+	number_one();
+	mass();
+	cout << endl;
+
+	for (int i = 0; i < 100; i++)
+	{
+		if (arr[i] % 1 == 0)
+			summ1++;
+		if (arr[i] % 2 == 0)
+			summ2++;
+		if (arr[i] % 3 == 0)
+			summ3++;
+		if (arr[i] % 4 == 0)
+			summ4++;
+		if (arr[i] % 5 == 0)
+			summ5++;
+		if (arr[i] % 6 == 0)
+			summ6++;
+		if (arr[i] % 7 == 0)
+			summ7++;
+		if (arr[i] % 8 == 0)
+			summ8++;
+		if (arr[i] % 9 == 0)
+			summ9++;
+	}
+	cout << "На число 1 делится " << summ1 << " элементов\n";
+	cout << "На число 2 делится " << summ2 << " элементов\n";
+	cout << "На число 3 делится " << summ3 << " элементов\n";
+	cout << "На число 4 делится " << summ4 << " элементов\n";
+	cout << "На число 5 делится " << summ5 << " элементов\n";
+	cout << "На число 6 делится " << summ6 << " элементов\n";
+	cout << "На число 7 делится " << summ7 << " элементов\n";
+	cout << "На число 8 делится " << summ8 << " элементов\n";
+	cout << "На число 9 делится " << summ9 << " элементов\n";
+
+}
+
+//это для третьей
+
+int** Mass(int size)
+{
+	int** Arr;
+	Arr = new int* [size];
+	for (int i = 0; i < size; i++) {
+		Arr[i] = new int[size];
+	}
+	return Arr;
+}
+void zapolnenie(int** Arr, int size)
+{
+
+	for (int i = 0; i < size; i++)
+	{
+		for (int j = 0; j < size; j++)
+		{
+			Arr[i][j] = rand() % ((size * size) + 1);
+		}
+
+	}
+}
+void OutMas(int** Arr, int size)
+{
+
+	for (int i = 0, f = 0; i < size; i++, f++)
+	{
+
+		for (int j = 0; j < size; j++)
+		{
+			cout << setw(4) << Arr[i][j];
+		}
+		cout << "\n\n";
+	}
+}
+int* Help;
+void snake(int** arr, int size, int sho, int x, int y, int limit) {
+
+	for (int i = sho; i < size; i++, y += 2) {
+		Help = arr[sho];
+		*Help = rand() % ((size * size) + 1);
+
+		Sleep(50);
+		COORD cur;
+		HANDLE Cons = GetStdHandle(STD_OUTPUT_HANDLE);
+		cur.X = x;
+		cur.Y = y;
+		SetConsoleCursorPosition(Cons, cur);
+		cout << *Help;
+
+
+		limit++;
+	}
+
+	sho = size - 1;
+	y -= 2;
+	x += 4;
+
+	if (limit < size * size) {
+
+		for (int i = sho; i >= 0; i--, y -= 2) {
+			Help = arr[i];
+			*Help = rand() % ((size * size) + 1);
+
+			Sleep(50);
+			COORD cur;
+			HANDLE Cons = GetStdHandle(STD_OUTPUT_HANDLE);
+			cur.X = x;
+			cur.Y = y;
+			SetConsoleCursorPosition(Cons, cur);
+			cout << *Help;
+
+			limit++;
+		}
+
+		sho = 0;
+
+		if (limit < size * size) snake(arr, size, sho, x += 4, y += 2, limit);
+
+	}
+
+}
+int* Help2;
+void number2(int** Arr, int size) {
+
+	int half = size / 2;
+
+	cout << "a)" << endl;
+	for (int i = 0; i < half; i++) {
+		Help = Arr[i];
+		for (int j = 0, el = half; j < half; j++, el++) {
+			swap(*(Help + el), *(Help + j));
+		}
+	}
+	for (int i = 0; i < half; i++) {
+		for (int j = 0, el = half; j < half; j++, el++) {
+			Help = Arr[j];
+			Help2 = Arr[el];
+			swap(*(Help + i), *(Help2 + i));
+		}
+	}
+	for (int i = half; i < size; i++) {
+		Help = Arr[i];
+		for (int j = 0, el = half; j < half; j++, el++) {
+			swap(*(Help + el), *(Help + j));
+		}
+	}
+	OutMas(Arr, size);
+}
+void sort(int** arr, int size)
+{
+	for (int limit = 0; limit < size * size; limit++)
+	{
+		for (int j = 0; j < size; j++)
+		{
+			Help = arr[j];
+			for (int i = 0; i < size - 1; i++)
+			{
+				if (*(Help + i) > * (Help + i + 1))
+				{
+					swap(*(Help + i), *(Help + i + 1));
+				}
+			}
+
+		}
+
+		for (int i = 0; i < size - 1; i++)
+		{
+			for (int j = 0; j < size - 1; j++)
+			{
+				Help = arr[j];
+
+				if (*(Help + i) > * (Help + i + 1))
+				{
+					swap(*(Help + i), *(Help + i + 1));
+				}
+			}
+		}
+
+		for (int i = 0; i < size - 1; i++)
+		{
+			Help = arr[i];
+			Help2 = arr[i + 1];
+			if (*(Help + size - 1) > * Help2)
+			{
+				swap(*(Help + size - 1), *Help2);
+			}
+		}
+	}
+}
+int number4(int** Arr, int size) {
+	while (true) {
+		int number;
+		cout << "Выберите действие:\n1)Уменьшить\n2)Увеличить\n3)Умножить\n4)Разделить\n0)Выйти\n";
+		cin >> number;
+		int count;
+
+		if (number == 1 || number == 2 || number == 3 || number == 4)
+		{
+			cout << "Введите число: ";
+			cin >> count;
+			cout << endl;
+		}
+		else  if (number == 0) {
+			return 0;
+			break;
+		}
+		else
+			cout << "Введено неверное число \n\n";
+
+		switch (number) {
+
+		case 1:
+
+			for (int i = 0; i < size; i++) {
+				Help = Arr[i];
+				for (int j = 0; j < size; j++) {
+					*(Help + j) = *(Help + j) - count;
+				}
+			}
+			OutMas(Arr, size);
+
+			break;
+		case 2:
+
+			for (int i = 0; i < size; i++) {
+				Help = Arr[i];
+				for (int j = 0; j < size; j++) {
+					*(Help + j) = *(Help + j) + count;
+				}
+			}
+			OutMas(Arr, size);
+
+			break;
+		case 3:
+
+			for (int i = 0; i < size; i++) {
+				Help = Arr[i];
+				for (int j = 0; j < size; j++) {
+					*(Help + j) = *(Help + j) * count;
+				}
+			}
+			OutMas(Arr, size);
+
+			break;
+		case 4:
+
+			if (count == 0) {
+				cout << "Я сама тебя на ноль сейчас поделю\nМеняй число!\n\n";
+				break;
+			}
+			for (int i = 0; i < size; i++) {
+				Help = Arr[i];
+				for (int j = 0; j < size; j++) {
+					*(Help + j) = *(Help + j) / count;
+				}
+			}
+			OutMas(Arr, size);
+
+			break;
+		}
+	}
+}
+
+int main()
+{
+	setlocale(LC_ALL, "Russian");
+
+	int end = 1;
+
+	while (end) {
+
+		int n;
+
+		cout << "Выберите номер практической работы:\n1)Первая практическая\n2)Вторая практическая\n3)Третья практическая\n4)Четвертая практическая\n5)Выход\n";
+
+		cin >> n;
+		switch (n)
+		{
+		case 1:
+		{
+			cout << setw(15) << "int " << sizeof(int) << " байта" << endl;
+			cout << setw(15) << "short int " << sizeof(short int) << " байта" << endl;
+			cout << setw(15) << "long int " << sizeof(long int) << " байта" << endl;
+			cout << setw(15) << "float " << sizeof(float) << " байта" << endl;
+			cout << setw(15) << "double " << sizeof(double) << " байт" << endl;
+			cout << setw(15) << "long double " << sizeof(long double) << " байт" << endl;
+			cout << setw(15) << "char " << sizeof(char) << " байт" << endl;
+			cout << setw(15) << "bool " << sizeof(bool) << " байт" << endl;
+
+
+			int n;
+			unsigned IMask = 1 << 31;
+			cout << "Введите число типа int: ";
+			cin >> n;
+			for (int i = 0; i < 32; i++)
+			{
+				if (i == 0)
+				{
+					putchar(n & IMask ? '1' : '0');
+					cout << " ";
+				}
+				else
+					putchar(n & IMask ? '1' : '0');
+				n <<= 1;
+			}
+			cout << endl;
+
+			union {
+				float fl;
+				int t;
+			};
+			unsigned FMask = 1 << 31;
+			cout << "Введите число типа float: ";
+			cin >> fl;
+			for (int i = 0; i < 32; i++)
+			{
+				if (i == 0 || i == 8)
+				{
+					putchar(t & FMask ? '1' : '0');
+					cout << " ";
+				}
+				else
+					putchar(t & FMask ? '1' : '0');
+				t <<= 1;
+			}
+			cout << endl;
+
+
+			union {
+				double db;
+				int j[2];
+			};
+			unsigned DMask = 1 << 31;
+			cout << "Введите число типа double: ";
+			cin >> db;
+			for (int i = 0; i < 32; i++)
+			{
+				putchar(j[1] & DMask ? '1' : '0');
+				if (i == 0 || i == 11) cout << "  ";
+				j[1] <<= 1;
+			}
+
+			for (int i = 32; i < 65; i++)
+			{
+				putchar(j[0] & DMask ? '1' : '0');
+				j[0] <<= 1;
+			}
+
+			cout << endl;
+
+			break;
+		}
+		case 2:
+		{
+			short int i;
+			cout << "Задания: \n";
+			cout << "1) Создает целочисленный массив размерности N = 100. Элементы массивы должны принимать случайное значение в диапазоне от - 99 до 99\n";
+			cout << "2) Отсортировать заданный в пункте 1 элементы массива […] сортировкой (от меньшего к большему). Определить время, затраченное на сортировку, используя библиотеку chrono.\n";
+			cout << "3) Найти максимальный и минимальный элемент массива. Подсчитайте время поиска этих элементов в отсортированном массиве и неотсортированном, используя библиотеку chrono.\n";
+			cout << "4) Выводит среднее значение (если необходимо, число нужно округлить) максимального и минимального значения. Выводит индексы всех элементов, которые равны этому значению, и их количество.\n";
+			cout << "5) Выводит количество элементов в отсортированном массиве, которые меньше числа a, которое инициализируется пользователем.\n";
+			cout << "6) Выводит количество элементов в отсортированном массиве, которые больше числа b, которое инициализируется пользователем.\n";
+			cout << "7) Выводит информацию о том, есть ли введенное пользователем число в отсортированном массиве. Реализуйте алгоритм бинарного поиска. Сравните скорость его работы с обычным перебором. (*)\n";
+			cout << "8) Меняет местами элементы массива, индексы которых вводит пользователь. Выведите скорость обмена, используя библиотеку chrono.\n";
+			cout << "9) Дополнительное задание. \n";
+			cout << "10) Выход\n" << endl;
+			cout << "Введите номер задания: ";
+
+			cin >> i;
+
+			switch (i)
+			{
+			case 1:
+				number_one(); mass();
+				break;
+			case 2:
+				number_one(); time(); mass();
+				break;
+			case 3:
+				number_three_unsort(); number_three_sort();
+				break;
+			case 4:
+				number_four(); mass();
+				break;
+			case 5:
+				number_five();
+				break;
+			case 6:
+				number_six();
+				break;
+			case 7:
+				number_seven();
+				break;
+			case 8:
+				number_eight();
+				break;
+			case 9:
+				dop();
+				break;
+			case 10:
+				break;
+
+			}
+			cout << endl;
+			break;
+		}
+		case 3: 
+		{
+			int size;
+
+			cout << "Выберите порядок квадратичной матрицы (6/8/10):  ";
+			cin >> size;
+
+			int** Arr;
+			Arr = Mass(size);
+			zapolnenie(Arr, size);
+
+
+
+			cout << "1) Используя арифметику указателей, заполняет квадратичную целочисленную матрицу порядка N (6,8,10) случайными числами от 1 до  N*N согласно схемам, приведенным на рисунках. Пользователь должен видеть процесс заполнения квадратичной матрицы.\n";
+
+			CONSOLE_SCREEN_BUFFER_INFO buff;
+			COORD coord;
+			(GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &buff));
+			coord.X = buff.dwCursorPosition.X;
+			coord.Y = buff.dwCursorPosition.Y;
+			Sleep(1000);
+			cout << "b)";
+			snake(Arr, size, 0, coord.X + 2, coord.Y, 1);
+
+			COORD cur;
+			HANDLE Cons = GetStdHandle(STD_OUTPUT_HANDLE);
+			cur.X = 0;
+			cur.Y = coord.Y + size * 2 + 2;
+			SetConsoleCursorPosition(Cons, cur);
+
+			cout << "2) Получает новую матрицу, из матрицы п. 1, переставляя ее блоки в соответствии со схемами: \n\n";
+			Sleep(1000);
+			cout << "До: \n";
+			Sleep(800);
+			OutMas(Arr, size);
+			Sleep(800);
+			cout << "После: \n";
+			Sleep(800);
+			number2(Arr, size);
+			Sleep(1000);
+
+			cout << "\n3) Используя арифметику указателей, сортирует элементы любой сортировкой:\n";
+			Sleep(1000);
+			cout << "До:\n";
+			Sleep(800);
+			OutMas(Arr, size);
+			sort(Arr, size);
+			Sleep(800);
+			cout << "После:\n";
+			Sleep(800);
+			OutMas(Arr, size);
+			Sleep(1000);
+
+			cout << "\n4) Уменьшает, увеличивает, умножает или делит все элементы матрицы на введенное пользователем число: \n";
+
+			Sleep(1000);
+			OutMas(Arr, size);
+			Sleep(800);
+			number4(Arr, size);
+			break;
+		}
+		case 4:
+		{
+			chetire(); 
+			break;
+		}
+
+		case 5:
+			end = 0;
+			return 0;
+		}
+	}
+}
